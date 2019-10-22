@@ -1,0 +1,32 @@
+.App {
+  text-align: center;
+  height: 100%;
+}
+
+.App-logo {
+  height: 40vmin;
+}
+
+.App {
+  flex-direction: row;
+  display: flex;
+}
+
+.App > div {
+  flex-grow: 1;
+  border-width: 2px;
+  border-color: red;
+  border-style: dashed;
+  padding-top: 30px;
+  text-align: left;
+  padding-left: 20px;
+  font-size: 25px;
+}
+
+.App div:first-child {
+  flex-grow: 2;
+}
+
+.App-link {
+  color: #09d3ac;
+}
