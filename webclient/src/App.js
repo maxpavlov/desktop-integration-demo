@@ -113,7 +113,7 @@ class HeartMeasurements extends React.Component {
     }
     componentDidMount() {
         const connection = new HubConnectionBuilder()
-            .withUrl("http://localhost:5000/hub")
+            .withUrl("http://localhost:55344/hub")
             .build();
 
         connection.on("ReceiveMessage", (id, message) => {

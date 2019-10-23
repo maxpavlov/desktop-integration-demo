@@ -31,10 +31,10 @@ namespace backend
             services.AddCors(options => options.AddPolicy("CorsPolicy", builder =>
             {
                 builder
-                    .AllowAnyOrigin()
+                    .WithOrigins("http://localhost:3000")
                     .AllowAnyMethod()
-                    .AllowAnyHeader();
-                    
+                    .AllowAnyHeader()
+                    .AllowCredentials();
             }));
 
             services.AddSignalR();
