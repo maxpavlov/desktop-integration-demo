@@ -13,7 +13,7 @@
 }
 
 .App > div {
-  flex-grow: 1;
+  flex-grow: 4;
   flex-basis: 0;
   border-width: 2px;
   border-color: red;
@@ -27,7 +27,11 @@
   justify-content: space-between;
 }
 
-.Patients {
+.App > div:first-child {
+  flex-grow: 4;
+}
+
+.App > div > div {
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -45,15 +49,19 @@
   background-color: #F5F5F5;
 }
 
-.AddPatient {
-  margin-top: auto;
-  margin-bottom: 30px;
-  display: flex;
-  flex-direction: row;
+.Upper > ul > li.active:hover {
+  background-color: #007bff;
 }
 
-.App > div:first-child {
-  flex-grow: 2;
+.App > div > div > div:last-child {
+  margin-top: auto;
+  margin-bottom: 30px;
+}
+
+.AddPatient {
+  margin-top: auto;
+  display: flex;
+  flex-direction: row;
 }
 
 .App-link {

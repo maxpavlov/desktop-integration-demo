@@ -1,5 +1,7 @@
 import React from 'react';
 import './App.css';
+import uuid from 'uuid';
+import { HubConnectionBuilder } from "@aspnet/signalr";
 
 class AddPatient extends React.Component {
     constructor(props) {
@@ -33,6 +35,7 @@ class Patients extends React.Component {
         super(props);
         this.onAddPatient = this.onAddPatient.bind(this);
         this.onPatientSelected = this.onPatientSelected.bind(this);
+        this.deselectAll = this.deselectAll.bind(this);
         this.state = {
             patients: props.patients,
             newPatientName: '',
@@ -50,15 +53,18 @@ class Patients extends React.Component {
         }
     }
 
-    showHide = () => {
+    showHide = e => {
+        e.stopPropagation();
         const state = this.state;
         state.showAddPatient = !state.showAddPatient;
         this.setState(state);
     };
 
-    onPatientSelected(selectedPatientName) {
+    onPatientSelected = (e, selectedPatientName) => {
+        e.stopPropagation();
         const state = this.state;
         state.currentPatient = selectedPatientName;
+        state.showAddPatient = false;
 
         this.setState(state);
 
@@ -66,19 +72,28 @@ class Patients extends React.Component {
 
     };
 
+    deselectAll() {
+        const state = this.state;
+        state.currentPatient = null;
+
+        this.setState(state);
+
+        this.props.onSelectPatient(null);
+    }
+
     render() {
         let listItems = this.state.patients.map((patient) =>
-            <li className={"list-group-item " + (this.state.currentPatient === patient.name && 'active') } key={patient.name} onClick={() => this.onPatientSelected(patient.name)}>
+            <li className={"list-group-item " + (this.state.currentPatient === patient.name && 'active') } key={patient.name} onClick={(e) => this.onPatientSelected(e, patient.name)}>
                 {patient.name}
             </li>);
 
-        return (<div className="Patients">
+        return (<div className="Patients" onClick={this.deselectAll}>
             <div className="Upper">
                 <h2>Patients</h2>
                 <ul className="list-group">{listItems}</ul>
             </div>
             <div className="AddPatient">
-                <button type="submit" onClick={this.showHide} className="btn btn-default">
+                <button type="submit" onClick={(e) => this.showHide(e)} className="btn btn-default">
                     { this.state.showAddPatient ? '-' : '+' }</button>
                 {this.state.showAddPatient && <AddPatient addPatient={this.onAddPatient}/>}
             </div>
@@ -86,8 +101,54 @@ class Patients extends React.Component {
     }
 }
 
-function HeartMeasurements() {
-    return <h2>Heart measurements</h2>
+class HeartMeasurements extends React.Component {
+    constructor(props) {
+        super(props);
+        this.onAddMeasurement = this.onAddMeasurement.bind(this);
+        this.state = {
+            cardiograms: props.cardiograms,
+            cardiogramCollectionInProgress: false,
+            hubConnection: null
+        };
+    }
+    componentDidMount() {
+        const connection = new HubConnectionBuilder()
+            .withUrl("http://localhost:5000/hub")
+            .build();
+
+        connection.on("ReceiveMessage", (id, message) => {
+            const msg = message.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            const encodedMsg = id + " says: " + msg;
+            console.log(encodedMsg);
+        });
+
+        connection.start({ withCredentials: false }).catch(err => console.error(err.toString()));
+    }
+
+    onAddMeasurement() {
+        console.log('Starting cardiogram via static launch page redirect...');
+        const measurementId = uuid.v4();
+        console.log('The id is: ' + measurementId);
+
+    }
+
+    render() {
+        let listItems = this.state.cardiograms.map((cardiogram) =>
+            <li className={"list-group-item"} key={cardiogram.id}>
+                {cardiogram.id}
+            </li>);
+
+        return (<div>
+            <div className="Upper">
+                <h2>Heart measurements</h2>
+                <ul className="list-group">{listItems}</ul>
+            </div>
+            <div className="AddCardiogram">
+                <button type="submit" onClick={this.onAddMeasurement} className="btn btn-default">+</button>
+                {this.state.cardiogramCollectionInProgress && <span>Collecting cardiogram...</span>}
+            </div>
+        </div>);
+    }
 }
 
 function EyeSightMeasurements() {
@@ -117,7 +178,7 @@ class App extends React.Component {
 
     handlePatientSelected(key) {
         const state = this.state;
-        state.currentPatient = key;
+        state.currentPatient = state.patients.find(e => e.name === key);
         this.setState(state);
     }
 
@@ -132,10 +193,10 @@ class App extends React.Component {
                     />
                 </div>
                 <div className="HeartMeasurements">
-                    <HeartMeasurements/>
+                    {this.state.currentPatient && <HeartMeasurements cardiograms={this.state.currentPatient.cardiograms}/>}
                 </div>
                 <div className="EyeSightMeasurements">
-                    <EyeSightMeasurements/>
+                    {this.state.currentPatient && <EyeSightMeasurements eyegrams={this.state.currentPatient.eyegrams}/>}
                 </div>
             </div>
         );
