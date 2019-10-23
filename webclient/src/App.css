@@ -64,6 +64,22 @@
   flex-direction: row;
 }
 
+.AddCardiogram {
+  display: flex;
+  flex-direction: row;
+}
+
+.Tip {
+  font-size: 14px;
+  vertical-align: middle;
+}
+
+.InstallPrompt {
+  display: flex;
+  flex-direction: row;
+  padding-top: 3px;
+}
+
 .App-link {
   color: #09d3ac;
 }

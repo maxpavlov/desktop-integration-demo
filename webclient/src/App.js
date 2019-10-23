@@ -105,15 +105,17 @@ class HeartMeasurements extends React.Component {
     constructor(props) {
         super(props);
         this.onAddMeasurement = this.onAddMeasurement.bind(this);
+        this.getStartClass = this.getStartClass.bind(this);
         this.state = {
             cardiograms: props.cardiograms,
-            cardiogramCollectionInProgress: false,
-            hubConnection: null
+            hubConnection: null,
+            isMeasurementBeingInstantiated: false,
+            isMeasurementInProgress: false
         };
     }
     componentDidMount() {
         const connection = new HubConnectionBuilder()
-            .withUrl("http://localhost:55344/hub")
+            .withUrl("http://localhost:5000/hub")
             .build();
 
         connection.on("ReceiveMessage", (id, message) => {
@@ -122,14 +124,35 @@ class HeartMeasurements extends React.Component {
             console.log(encodedMsg);
         });
 
-        connection.start({ withCredentials: false }).catch(err => console.error(err.toString()));
+        this.state.hubConnection = connection;
+
+        this.state.hubConnection.start({ withCredentials: false }).catch(err => console.error(err.toString()));
     }
 
     onAddMeasurement() {
         console.log('Starting cardiogram via static launch page redirect...');
         const measurementId = uuid.v4();
         console.log('The id is: ' + measurementId);
+        const message = "invoke-cardiograph"
+        this.state.hubConnection.invoke("SendMessage", measurementId, message).catch(function (err) {
+            return console.error(err.toString());
+        });
 
+        const state = this.state;
+        state.isMeasurementBeingInstantiated = true;
+        this.setState(state);
+    }
+
+    getStartClass() {
+        const state = this.state;
+
+        if (state.isMeasurementBeingInstantiated) {
+            return 'fa fa-spinner fa-spin';
+        } else if (state.isMeasurementInProgress) {
+            return 'fa fa-spinner fa-pulse';
+        }
+
+        return '';
     }
 
     render() {
@@ -144,8 +167,8 @@ class HeartMeasurements extends React.Component {
                 <ul className="list-group">{listItems}</ul>
             </div>
             <div className="AddCardiogram">
-                <button type="submit" onClick={this.onAddMeasurement} className="btn btn-default">+</button>
-                {this.state.cardiogramCollectionInProgress && <span>Collecting cardiogram...</span>}
+                <button type="submit" onClick={this.onAddMeasurement} className={"btn btn-default shadow-none " + this.getStartClass()}>{!this.state.isMeasurementBeingInstantiated && !this.state.isMeasurementInProgress && '+'}</button>
+                {this.state.isMeasurementBeingInstantiated && <div className="InstallPrompt"><span className="Tip">No prompt?&nbsp;</span><a href="#" className="Tip">Install companion!</a></div>}
             </div>
         </div>);
     }
