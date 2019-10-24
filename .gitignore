@@ -6,3 +6,16 @@ webclient/node_modules/
 backend/obj/
 backend/bin/
 backend/.vs/
+companion/.vs/
+companion/bin/
+companion/obj/
+companion/packages/
+installer/.vs/
+installer/bin/
+installer/obj/
+third-party-one/.vs/
+third-party-one/bin/
+third-party-one/obj/
+third-party-two/.vs/
+third-party-two/bin/
+third-party-two/obj/

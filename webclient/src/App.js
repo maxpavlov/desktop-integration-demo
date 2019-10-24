@@ -106,28 +106,82 @@ class HeartMeasurements extends React.Component {
         super(props);
         this.onAddMeasurement = this.onAddMeasurement.bind(this);
         this.getStartClass = this.getStartClass.bind(this);
+		this.sendToGround = this.sendToGround.bind(this);
+		this.resetMeasurement = this.resetMeasurement.bind(this);
         this.state = {
             cardiograms: props.cardiograms,
             hubConnection: null,
             isMeasurementBeingInstantiated: false,
-            isMeasurementInProgress: false
+            isMeasurementInProgress: false,
+			measurementId: null
         };
     }
     componentDidMount() {
         const connection = new HubConnectionBuilder()
-            .withUrl("http://localhost:5000/hub")
+            .withUrl("http://localhost:55344/hub")
             .build();
 
         connection.on("ReceiveMessage", (id, message) => {
             const msg = message.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
             const encodedMsg = id + " says: " + msg;
             console.log(encodedMsg);
+			if(msg == 'STARTED' && this.state.isMeasurementBeingInstantiated && this.state.measurementId === id)
+			{
+				const state = this.state;
+				state.isMeasurementBeingInstantiated = false;
+				state.isMeasurementInProgress = true;
+				this.setState(state);
+			}
+			
+			if(msg == 'STOPPED' && this.state.isMeasurementInProgress && this.state.measurementId === id)
+			{
+				const state = this.state;
+				state.isMeasurementBeingInstantiated = false;
+				state.isMeasurementInProgress = false;
+				state.measurementId = null;
+				this.setState(state);
+			}
+			
+			if(msg.startsWith('DATA:') && this.state.isMeasurementInProgress && this.state.measurementId === id)
+			{
+				const state = this.state;
+				
+				let data = msg.substring(5);
+				
+				var newCardiogramData = data.split(',').map(Number);
+				
+				let newCardiogram = { id: id, data: newCardiogramData };
+				
+				state.cardiograms.push(newCardiogram);
+				
+				state.isMeasurementBeingInstantiated = false;
+				state.isMeasurementInProgress = false;
+				state.measurementId = null;
+				this.setState(state);
+			}
+			
         });
 
         this.state.hubConnection = connection;
-
+ 
         this.state.hubConnection.start({ withCredentials: false }).catch(err => console.error(err.toString()));
     }
+	
+	sendToGround = function(action, params) {
+		var e = document.createElement('a');
+		e.id = 'sendToGround';
+		var strParams = "";
+		if(typeof params !== 'undefined') {
+		  Object.keys(params).forEach(function(key) {
+			strParams += strParams !== "" ? '&' : '';
+			strParams += key+'='+encodeURI(params[key]);
+		  });
+		}
+		e.href = strParams.length > 0 ? 'companion'+'://'+action+'?'+strParams : 'companion'+'://'+action;
+		document.getElementsByTagName('body')[0].appendChild(e);
+		e.click();
+		e.parentNode.removeChild(e);
+	}
 
     onAddMeasurement() {
         console.log('Starting cardiogram via static launch page redirect...');
@@ -140,7 +194,12 @@ class HeartMeasurements extends React.Component {
 
         const state = this.state;
         state.isMeasurementBeingInstantiated = true;
+		state.measurementId = measurementId;
         this.setState(state);
+		
+		const parameters = {'measurementId': measurementId};
+		
+		this.sendToGround('cardiograph', parameters);
     }
 
     getStartClass() {
@@ -154,11 +213,18 @@ class HeartMeasurements extends React.Component {
 
         return '';
     }
+	
+	resetMeasurement() {
+		const state = this.state;
+        state.isMeasurementBeingInstantiated = false;
+		state.measurementId = null;
+        this.setState(state);
+	}
 
     render() {
         let listItems = this.state.cardiograms.map((cardiogram) =>
             <li className={"list-group-item"} key={cardiogram.id}>
-                {cardiogram.id}
+                {cardiogram.data}
             </li>);
 
         return (<div>
@@ -168,7 +234,8 @@ class HeartMeasurements extends React.Component {
             </div>
             <div className="AddCardiogram">
                 <button type="submit" onClick={this.onAddMeasurement} className={"btn btn-default shadow-none " + this.getStartClass()}>{!this.state.isMeasurementBeingInstantiated && !this.state.isMeasurementInProgress && '+'}</button>
-                {this.state.isMeasurementBeingInstantiated && <div className="InstallPrompt"><span className="Tip">No prompt?&nbsp;</span><a href="#" className="Tip">Install companion!</a></div>}
+                {this.state.isMeasurementBeingInstantiated && <div className="InstallPrompt"><span className="Tip">No prompt?&nbsp;</span><a href="http://localhost:55344/static/installer.msi" onClick={this.resetMeasurement} target="_blank" className="Tip">Install companion!</a></div>}
+				{this.state.isMeasurementInProgress && <div className="InstallPrompt"><span className="Tip">Measurement is in progress...</span></div>}
             </div>
         </div>);
     }

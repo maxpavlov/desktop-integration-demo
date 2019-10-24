@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+	<Product Id="7fee0ff7-5448-46ec-9a8a-94f8c70c3644" Name="Companion" Language="1033" Version="1.0.0.0" Manufacturer="Max Pavlov" UpgradeCode="0e7a9e01-a261-42e1-8330-6c3b2ee7b307">
+		<Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
+
+		<MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    <MediaTemplate EmbedCab="yes" />
+
+		<Feature Id="ProductFeature" Title="Companion" Level="1">
+			<ComponentGroupRef Id="ProductComponents" />
+		</Feature>
+	</Product>
+
+	<Fragment>
+		<Directory Id="TARGETDIR" Name="SourceDir">
+			<Directory Id="ProgramFilesFolder">
+				<Directory Id="INSTALLFOLDER" Name="Companion" />
+			</Directory>
+		</Directory>
+	</Fragment>
+
+	<Fragment>
+    <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+      <Component Id="ProductComponent" Guid="{206C911C-56EF-44B8-9257-5FD214427965}">
+        <File Source="$(var.companion.TargetPath)" />
+        <RegistryKey Root="HKCR"
+                     Key="companion"
+                     Action="createAndRemoveOnUninstall">
+          <RegistryValue Type="string" Name="URL Protocol" Value=""/>
+          <RegistryValue Type="string" Value="Companion"/>
+          <RegistryKey Key="DefaultIcon">
+            <RegistryValue Type="string" Value="companion.exe" />
+          </RegistryKey>
+          <RegistryKey Key="shell\open\command">
+            <RegistryValue Type="string" Value="&quot;[INSTALLFOLDER]companion.exe&quot; &quot;%1&quot;" />
+          </RegistryKey>
+        </RegistryKey>
+      </Component>
+      <Component Id="Support1Component">
+        <File Source="$(var.third-party-one.TargetPath)" />
+      </Component>
+      <Component Id="Support2Component">
+        <File Source="$(var.third-party-two.TargetPath)" />
+      </Component>
+    </ComponentGroup>
+	</Fragment>
+</Wix>

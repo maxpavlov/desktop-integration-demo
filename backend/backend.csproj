@@ -9,6 +9,5 @@
 
   <ItemGroup>
     <Folder Include="Hubs\" />
-    <Folder Include="static\" />
   </ItemGroup>
 </Project>

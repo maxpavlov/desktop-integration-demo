@@ -83,3 +83,14 @@
 .App-link {
   color: #09d3ac;
 }
+
+a#sendToGround {
+  display:block;
+  position: fixed;
+  bottom: -1px;
+  right: -1px;
+  z-index: -1;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}

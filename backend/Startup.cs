@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
@@ -11,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using backend.Hubs;
+using Microsoft.Extensions.FileProviders;
 
 namespace backend
 {
@@ -51,7 +53,12 @@ namespace backend
             }
 
             app.UseRouting();
-            app.UseStaticFiles();
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(
+                    Path.Combine(Directory.GetCurrentDirectory(), "static")),
+                RequestPath = "/static"
+            });
 
             app.UseEndpoints(endpoints =>
             {

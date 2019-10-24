@@ -1,0 +1,52 @@
+﻿<Window x:Class="companion.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:companion.Views"
+        xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+        mc:Ignorable="d"
+        Title="vNext Companion" Style="{StaticResource DemoCompanionWindow}" Icon="../Resources/companion.ico" WindowStartupLocation="CenterScreen" Height="334" Width="798.955">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="361"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="30"/>
+        </Grid.RowDefinitions>
+
+        <!--Make window draggable -->
+        <i:Interaction.Triggers>
+            <i:EventTrigger EventName="MouseDown" >
+                <i:InvokeCommandAction Command="{Binding DragMoveCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}" />
+            </i:EventTrigger>
+            <i:EventTrigger>
+                <i:InvokeCommandAction Command="{Binding ReadyCommand}"/>
+            </i:EventTrigger>
+        </i:Interaction.Triggers>
+
+        <!--Background -->
+        <Border x:Name="LightBackground" Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Grid.ColumnSpan="2" Background="#fff" BorderThickness="1" BorderBrush="{StaticResource LightGray}" CornerRadius="5" HorizontalAlignment="Left" Width="796"/>
+        <Border x:Name="DarkBackground" Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Background="{StaticResource DarkBlue}" CornerRadius="5,0,0,5" Margin="0,0,59,0"/>
+
+        <!--Window control buttons -->
+        <StackPanel x:Name="WindowButtons"  Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="16" Orientation="Horizontal" >
+            <Button x:Name="MinimizeButton" Style="{StaticResource BasicButton}" Content="{StaticResource MinimizeIcon}" Margin="0,0,16,0" Command="{Binding MinimizeCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"></Button>
+            <Button x:Name="CloseButton" Style="{StaticResource BasicButton}" Content="{StaticResource CloseIcon}" Command="{Binding CloseCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"></Button>
+        </StackPanel>
+
+        <!--Novax Logo -->
+        <ContentControl x:Name="Logo" Grid.Row="0" Grid.Column="0" Margin="49,78,59,226" Content="{StaticResource LogoWhite}"/>
+
+        <!--Main Text -->
+        <StackPanel x:Name="MainText" Grid.Row="0" Grid.Column="1" Margin="136,102,0,0" >
+            <TextBlock Text="Measurement has started..." Style="{StaticResource Title}" Margin="-162,0,0,0"/>
+
+        </StackPanel>
+
+        <!--Footer-->
+        <Label x:Name="LoggingStatus" Style="{StaticResource SmallText}" Grid.Column="0" Margin="10,0,75,0" Content="{Binding Status}" Foreground="{StaticResource LightBlue}" Grid.Row="1"/>
+    </Grid>
+</Window>
